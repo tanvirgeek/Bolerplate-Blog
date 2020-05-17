@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema({
     }
 
 });
-userSchema.pre('save', function (next){
+userSchema.pre('save', function (next) {
     var user = this;
     if (user.isModified('password')) {
         bcrypt.genSalt(saltRounds, function (err, salt) {
@@ -46,29 +46,45 @@ userSchema.pre('save', function (next){
                 next();
             });
         });
-    }else{
+    } else {
         next();
     }
 })
 
-userSchema.methods.comparePassword = async function(plainPassword, cb){
-    await bcrypt.compare(plainPassword, this.password, function(err, result) {
-        if(err) return cb(err);
+userSchema.methods.comparePassword = async function (plainPassword, cb) {
+    await bcrypt.compare(plainPassword, this.password, function (err, result) {
+        if (err) return cb(err);
         cb(null, result)
     });
 }
 
-userSchema.methods.generateToken = function(cb){
+userSchema.methods.generateToken = function (cb) {
     var user = this;
     var token = jwt.sign({
         data: user._id.toHexString()
-      }, 'secret', { expiresIn: 60 * 60 });
+    }, 'secret', { expiresIn: 60 * 60 });
     user.token = token;
 
-    user.save(function(err, user){
-        if(err) return (cb(err));
+    user.save(function (err, user) {
+        if (err) return (cb(err));
         cb(null, user);
     })
+}
+
+userSchema.statics.findByToken = function (token, cb) {
+    var user = this;
+    jwt.verify(token, 'secret', function (err, decoded) {
+        if (err) {
+            return cb(err)
+        }
+        else {
+            console.log(decoded);
+            user.findOne({"_id":decoded.data, "token":token}, (err, user)=>{
+                if (err) return cb(err)
+                return cb(null, user);
+            })
+        }
+    });
 }
 
 module.exports = mongoose.model('User', userSchema);

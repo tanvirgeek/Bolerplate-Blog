@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const userModel = require('../models/User');
+const auth = require("../middlewares/auth");
 
 router.post("/register", async (req, res) => {
     try {
@@ -33,9 +34,27 @@ router.post('/login', async (req, res)=>{
 
     user.generateToken((err, user)=>{
         if(err) return res.status(400).json({error: err});
-        res.cookie("x-auth", user.token).status(200).json({
+        res.cookie("x_auth", user.token).status(200).json({
             message:"Login Success"
         })
+    })
+})
+
+router.get("/auth",auth, (req,res)=>{
+    res.status(200).json({
+        _id : req.id,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role
+    })
+})
+
+router.get("/logout", auth, (req,res)=>{
+    userModel.findByIdAndUpdate({_id: req.user._id},{token:""}, (err,doc)=>{
+        if(err) res.json({success: false,err})
+        res.status(200).json({success:true});
     })
 })
 
