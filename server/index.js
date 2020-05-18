@@ -9,7 +9,7 @@ const config = require('./config/key');
 
 startApp = async()=>{
     try {
-        console.log(config);
+        console.log(config.mongoURI);
         await mongoose.connect(
             config.mongoURI,
             {useNewUrlParser: true, useUnifiedTopology: true });
