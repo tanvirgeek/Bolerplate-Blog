@@ -52,7 +52,7 @@ router.get("/auth",auth, (req,res)=>{
 })
 
 router.get("/logout", auth, (req,res)=>{
-    userModel.findByIdAndUpdate({_id: req.user._id},{token:""}, (err,doc)=>{
+    userModel.findByIdAndUpdate({_id: req.user._id},{token:""}, {useFindAndModify: false}, (err,doc)=>{
         if(err) res.json({success: false,err})
         res.status(200).json({success:true});
     })

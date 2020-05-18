@@ -5,14 +5,16 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 require('dotenv').config()
+const config = require('./config/key');
 
 startApp = async()=>{
     try {
+        console.log(config);
         await mongoose.connect(
-            process.env.MONGO_URL,
+            config.mongoURI,
             {useNewUrlParser: true, useUnifiedTopology: true });
         console.log('connected to db');
-        const port = process.env.PORT || 3000
+        const port = process.env.PORT || 5000
         app.listen(port);
         console.log(`server connected to port ${port}`)
     } catch (error) {
